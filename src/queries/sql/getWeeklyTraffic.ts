@@ -14,7 +14,7 @@ export async function getWeeklyTraffic(...args: [websiteId: string, filters: Que
 }
 
 async function relationalQuery(websiteId: string, filters: QueryFilters) {
-  const timezone = 'utc';
+  const { timezone = 'utc' } = filters;
   const { rawQuery, getDateWeeklySQL, parseFilters } = prisma;
   const { filterQuery, joinSessionQuery, cohortQuery, queryParams } = parseFilters({
     ...filters,
