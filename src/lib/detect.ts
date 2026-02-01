@@ -33,15 +33,10 @@ const PROVIDER_HEADERS = [
 export function getDevice(userAgent: string, screen: string = '') {
   const { device } = UAParser(userAgent);
 
-  const [width] = screen.split('x');
-
-  const type = device?.type || 'desktop';
-
-  if (type === 'desktop' && screen && +width <= 1920) {
-    return 'laptop';
-  }
-
-  return type;
+  // Return device type from UA parser, defaulting to 'desktop'
+  // Note: Removed unreliable laptop detection heuristic (width <= 1920)
+  // since screen width alone cannot reliably distinguish laptops from desktops
+  return device?.type || 'desktop';
 }
 
 function getRegionCode(country: string, region: string) {
