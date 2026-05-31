@@ -47,6 +47,29 @@ function getRegionCode(country: string, region: string) {
   return region.includes('-') ? region : `${country}-${region}`;
 }
 
+const US_SUBDIVISION_CODES: Record<string, string> = {
+  Alabama: 'AL', Alaska: 'AK', Arizona: 'AZ', Arkansas: 'AR', California: 'CA',
+  Colorado: 'CO', Connecticut: 'CT', Delaware: 'DE', 'District of Columbia': 'DC',
+  Florida: 'FL', Georgia: 'GA', Hawaii: 'HI', Idaho: 'ID', Illinois: 'IL',
+  Indiana: 'IN', Iowa: 'IA', Kansas: 'KS', Kentucky: 'KY', Louisiana: 'LA',
+  Maine: 'ME', Maryland: 'MD', Massachusetts: 'MA', Michigan: 'MI', Minnesota: 'MN',
+  Mississippi: 'MS', Missouri: 'MO', Montana: 'MT', Nebraska: 'NE', Nevada: 'NV',
+  'New Hampshire': 'NH', 'New Jersey': 'NJ', 'New Mexico': 'NM', 'New York': 'NY',
+  'North Carolina': 'NC', 'North Dakota': 'ND', Ohio: 'OH', Oklahoma: 'OK',
+  Oregon: 'OR', Pennsylvania: 'PA', 'Rhode Island': 'RI', 'South Carolina': 'SC',
+  'South Dakota': 'SD', Tennessee: 'TN', Texas: 'TX', Utah: 'UT', Vermont: 'VT',
+  Virginia: 'VA', Washington: 'WA', 'West Virginia': 'WV', Wisconsin: 'WI',
+  Wyoming: 'WY', 'Puerto Rico': 'PR',
+};
+
+function subdivisionNameToCode(country?: string, name?: string | null) {
+  if (country === 'US' && name) {
+    return US_SUBDIVISION_CODES[name];
+  }
+
+  return undefined;
+}
+
 function decodeHeader(s: string | undefined | null): string | undefined | null {
   if (s === undefined || s === null) {
     return s;
@@ -91,7 +114,9 @@ export async function getLocation(ip: string = '', headers: Headers, hasPayloadI
 
   if (result) {
     const country = result.country?.iso_code ?? result?.registered_country?.iso_code;
-    const region = result.subdivisions?.[0]?.iso_code;
+    const region =
+      result.subdivisions?.[0]?.iso_code ??
+      subdivisionNameToCode(country, result.subdivisions?.[0]?.names?.en);
     const city = result.city?.names?.en;
 
     return {
