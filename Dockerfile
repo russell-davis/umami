@@ -45,7 +45,8 @@ RUN set -x \
 RUN pnpm --allow-build='@prisma/engines' --allow-build='prisma' add npm-run-all dotenv chalk semver \
     prisma@${PRISMA_VERSION} \
     @prisma/client@${PRISMA_VERSION} \
-    @prisma/adapter-pg@${PRISMA_VERSION}
+    @prisma/adapter-pg@${PRISMA_VERSION} \
+    && cp -a /app/node_modules /opt/script-node-modules
 
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder /app/prisma ./prisma
@@ -57,6 +58,12 @@ COPY --from=builder /app/generated ./generated
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Next.js standalone output-tracing ships PARTIAL copies of the script deps
+# (e.g. semver missing index.js), which shadow the complete packages installed
+# above and crash scripts/check-db.js at startup. Restore the complete versions.
+RUN cp -af /opt/script-node-modules/. /app/node_modules/ \
+    && rm -rf /opt/script-node-modules
 
 USER nextjs
 
